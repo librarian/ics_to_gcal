@@ -1,5 +1,8 @@
 # ICS to Google Calendar
 
+[![CI](https://github.com/librarian/ics_to_gcal/actions/workflows/ci.yml/badge.svg)](https://github.com/librarian/ics_to_gcal/actions/workflows/ci.yml)
+[![Release](https://github.com/librarian/ics_to_gcal/actions/workflows/release.yml/badge.svg)](https://github.com/librarian/ics_to_gcal/actions/workflows/release.yml)
+
 A Firefox extension that intercepts `.ics` links and downloads, then opens
 Google Calendar's new-event screen with the event details filled in.
 
@@ -76,6 +79,25 @@ and does not require npm because the pinned `ical.js` browser module is vendored
 
 If npm is available, the equivalent commands are `npm test`, `npm run build`,
 and `npm run package`.
+
+## Continuous integration and releases
+
+GitHub Actions runs the tests and produces an XPI artifact for every push and
+pull request. Dependabot checks GitHub Actions weekly and npm metadata monthly.
+
+Releases are created from version tags. Before tagging, keep the versions in
+`package.json`, `package-lock.json`, and `src/manifest.json` identical, then run:
+
+```bash
+bash scripts/wsl-build.sh
+git tag -a v0.3.0 -m "v0.3.0"
+git push origin main
+git push origin v0.3.0
+```
+
+The tag must be exactly `v` followed by the package version. The release
+workflow reruns all tests, creates a deterministic XPI and SHA-256 checksum,
+then publishes both as GitHub Release assets with generated release notes.
 
 ## Known limitations
 

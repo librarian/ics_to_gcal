@@ -16,5 +16,6 @@ if (( node_major < 18 )); then
 fi
 
 node --test
+node scripts/check-version.mjs
 node scripts/build.mjs
 python3 scripts/package.py
