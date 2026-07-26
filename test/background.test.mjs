@@ -24,6 +24,7 @@ async function waitFor(predicate, timeoutMs = 1000) {
 test("calendar response interception replaces the source tab with Google Calendar", async () => {
   const listeners = {};
   const updatedTabs = [];
+  const openedTabs = [];
   const createdMenus = [];
 
   globalThis.browser = {
@@ -45,10 +46,11 @@ test("calendar response interception replaces the source tab with Google Calenda
       create: async () => "notification"
     },
     runtime: {
-      getURL: (path) => `moz-extension://test/${path}`
+      getURL: (path) => `moz-extension://test/${path}`,
+      onMessage: { addListener: (listener) => (listeners.message = listener) }
     },
     tabs: {
-      create: async () => {},
+      create: async (options) => openedTabs.push(options),
       update: async (tabId, options) => updatedTabs.push({ tabId, ...options }),
       onUpdated: { addListener: (listener) => (listeners.tab = listener) }
     },
@@ -82,6 +84,16 @@ test("calendar response interception replaces the source tab with Google Calenda
     const destination = new URL(updatedTabs[0].url);
     assert.equal(destination.origin, "https://calendar.google.com");
     assert.equal(destination.searchParams.get("text"), "Intercepted event");
+
+    await listeners.message({
+      type: "calendar-blob",
+      blobUrl: "blob:https://example.test/calendar",
+      text: ICS
+    });
+    assert.equal(openedTabs.length, 1);
+    const blobDestination = new URL(openedTabs[0].url);
+    assert.equal(blobDestination.origin, "https://calendar.google.com");
+    assert.equal(blobDestination.searchParams.get("text"), "Intercepted event");
   } finally {
     delete globalThis.browser;
     delete globalThis.fetch;

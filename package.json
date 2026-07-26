@@ -1,6 +1,6 @@
 {
   "name": "ics-to-gcal",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Firefox extension that converts local or opened ICS events into Google Calendar edit links.",

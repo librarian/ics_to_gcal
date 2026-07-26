@@ -11,6 +11,8 @@ const MENU_LINK = "ics-to-gcal-link";
 const MENU_PAGE = "ics-to-gcal-page";
 const activeConversions = new Set();
 const bypassDownloadUrls = new Map();
+const capturedBlobUrls = new Set();
+const BLOB_TTL_MS = 60_000;
 
 async function installMenus() {
   await browser.menus.removeAll();
@@ -107,6 +109,17 @@ function consumeDownloadBypass(url) {
   return true;
 }
 
+async function waitForCapturedBlob(url, timeoutMs = 750) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (capturedBlobUrls.has(url)) {
+      return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  return capturedBlobUrls.has(url);
+}
+
 async function convertUrl(url, { replaceTabId, fallback } = {}) {
   if (!url || activeConversions.has(url)) {
     return;
@@ -138,6 +151,26 @@ async function convertUrl(url, { replaceTabId, fallback } = {}) {
   }
 }
 
+async function convertText(text, { blobUrl } = {}) {
+  if (blobUrl && capturedBlobUrls.has(blobUrl)) {
+    return;
+  }
+  if (blobUrl) {
+    capturedBlobUrls.add(blobUrl);
+    const cleanupTimer = setTimeout(
+      () => capturedBlobUrls.delete(blobUrl),
+      BLOB_TTL_MS
+    );
+    cleanupTimer?.unref?.();
+  }
+
+  try {
+    await openEvents(parseCalendar(text));
+  } catch (error) {
+    await notify("ICS conversion failed", error.message);
+  }
+}
+
 browser.webRequest.onHeadersReceived.addListener(
   (details) => {
     if (
@@ -164,10 +197,20 @@ browser.downloads.onCreated.addListener((item) => {
   }
 
   void (async () => {
+    if (url.startsWith("blob:") && !(await waitForCapturedBlob(url))) {
+      // A Blob outside our page hook cannot be fetched from the background
+      // context. Leave its original Firefox download untouched.
+      return;
+    }
+
     try {
       await browser.downloads.cancel(item.id);
     } catch {
       // A very small file may complete before Firefox processes the event.
+    }
+
+    if (url.startsWith("blob:")) {
+      return;
     }
 
     await convertUrl(url, {
@@ -179,6 +222,19 @@ browser.downloads.onCreated.addListener((item) => {
       }
     });
   })();
+});
+
+browser.runtime.onMessage.addListener((message) => {
+  if (
+    message?.type !== "calendar-blob" ||
+    typeof message.text !== "string" ||
+    new TextEncoder().encode(message.text).byteLength > MAX_ICS_BYTES ||
+    !/BEGIN:VCALENDAR/i.test(message.text)
+  ) {
+    return undefined;
+  }
+
+  return convertText(message.text, { blobUrl: message.blobUrl });
 });
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {

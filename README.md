@@ -12,6 +12,7 @@ opens the draft. Nothing is added until you press **Save**.
 
 - Intercepts GET responses served as `text/calendar` or ICS attachments.
 - Detects Firefox downloads by URL, filename, and calendar MIME type.
+- Captures `text/calendar` Blob downloads generated entirely in page JavaScript.
 - Adds **Open ICS in Google Calendar** to the link context menu.
 - Converts the current URL when the toolbar button is clicked.
 - Handles files containing multiple `VEVENT` entries by opening one draft per
@@ -33,7 +34,7 @@ opens the draft. Nothing is added until you press **Save**.
 4. Choose `dist/manifest.json`.
 
 Temporary add-ons disappear when Firefox restarts. The packaged extension is
-written to `artifacts/ics-to-gcal-0.2.0.xpi`; permanent installation requires a
+written to `artifacts/ics-to-gcal-0.3.0.xpi`; permanent installation requires a
 Mozilla-signed build in standard Firefox releases.
 
 ## Use it
@@ -49,6 +50,11 @@ Use any of these paths:
 
 If an intercepted URL cannot be fetched or parsed, the extension restores the
 original Firefox download and shows a notification.
+
+For client-generated calendar files, a small page hook observes
+`URL.createObjectURL()` at `document_start`. Only Blobs whose MIME type starts
+with `text/calendar` are read and forwarded to the extension parser. The
+matching synthetic download click is suppressed.
 
 ## Development
 
