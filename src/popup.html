@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ICS to Google Calendar</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="icons/calendar.svg" alt="" width="32" height="32">
+        <div>
+          <h1>ICS to Google Calendar</h1>
+          <p>Files stay in this browser.</p>
+        </div>
+      </header>
+
+      <section id="drop-zone" class="drop-zone">
+        <strong>Drop an .ics file here</strong>
+        <span>or</span>
+        <label class="file-button">
+          Choose a file
+          <input id="file-input" type="file" accept=".ics,text/calendar">
+        </label>
+      </section>
+
+      <p id="status" class="status" role="status">Checking the current tab…</p>
+      <section id="events" class="events" aria-live="polite"></section>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

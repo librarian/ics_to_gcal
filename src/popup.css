@@ -1,0 +1,124 @@
+:root {
+  color-scheme: light dark;
+  font: menu;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 390px;
+  max-width: 480px;
+  background: Canvas;
+  color: CanvasText;
+}
+
+main {
+  padding: 16px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 16px;
+}
+
+header p {
+  margin: 2px 0 0;
+  color: GrayText;
+  font-size: 12px;
+}
+
+.drop-zone {
+  display: flex;
+  min-height: 116px;
+  padding: 18px;
+  border: 2px dashed color-mix(in srgb, #4285f4 65%, CanvasText);
+  border-radius: 12px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: color-mix(in srgb, #4285f4 7%, Canvas);
+  transition: background 120ms, border-color 120ms;
+}
+
+.drop-zone.dragging {
+  border-color: #34a853;
+  background: color-mix(in srgb, #34a853 14%, Canvas);
+}
+
+.drop-zone span {
+  color: GrayText;
+  font-size: 12px;
+}
+
+.file-button,
+.event-link {
+  display: inline-block;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: #1a73e8;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.file-button:hover,
+.event-link:hover {
+  background: #1557b0;
+}
+
+#file-input {
+  display: none;
+}
+
+.status {
+  margin: 12px 2px 0;
+  color: GrayText;
+  font-size: 12px;
+}
+
+.status.error {
+  color: #c5221f;
+}
+
+.events {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.event-card {
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, CanvasText 20%, Canvas);
+  border-radius: 10px;
+}
+
+.event-card h2 {
+  overflow-wrap: anywhere;
+  margin: 0 0 5px;
+  font-size: 14px;
+}
+
+.event-meta {
+  margin: 0 0 10px;
+  color: GrayText;
+  font-size: 12px;
+}
+
+.warning {
+  margin: 8px 0 0;
+  color: #b06000;
+  font-size: 11px;
+}

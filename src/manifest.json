@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "ICS to Google Calendar",
+  "version": "0.1.0",
+  "description": "Open ICS events as editable Google Calendar drafts.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_title": "ICS to Google Calendar",
+    "default_popup": "popup.html",
+    "default_icon": "icons/calendar.svg"
+  },
+  "icons": {
+    "48": "icons/calendar.svg",
+    "96": "icons/calendar.svg"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ics-to-gcal@local",
+      "strict_min_version": "109.0"
+    }
+  }
+}
