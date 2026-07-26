@@ -1,17 +1,21 @@
 # ICS to Google Calendar
 
-A small Firefox extension that reads an `.ics` file locally and opens Google
-Calendar's new-event screen with the event details filled in.
+A Firefox extension that intercepts `.ics` links and downloads, then opens
+Google Calendar's new-event screen with the event details filled in.
 
-The extension does not upload calendar files, use the Google Calendar API, or
-request access to your Google account. Nothing is added until you review the
-event and press **Save** in Google Calendar.
+The extension does not use the Google Calendar API or request access to your
+Google account. It fetches the selected ICS URL inside Firefox, parses it
+locally, and sends only the resulting event fields to Google Calendar when it
+opens the draft. Nothing is added until you press **Save**.
 
 ## Features
 
-- Reads an ICS document displayed in the current Firefox tab.
-- Accepts local files using a picker or drag and drop.
-- Handles files containing multiple `VEVENT` entries.
+- Intercepts GET responses served as `text/calendar` or ICS attachments.
+- Detects Firefox downloads by URL, filename, and calendar MIME type.
+- Adds **Open ICS in Google Calendar** to the link context menu.
+- Converts the current URL when the toolbar button is clicked.
+- Handles files containing multiple `VEVENT` entries by opening one draft per
+  event.
 - Preserves titles, descriptions, locations, attendees, all-day dates, named
   time zones, and common recurrence rules.
 - Parses files locally with [ical.js](https://github.com/mozilla-comm/ical.js).
@@ -29,17 +33,22 @@ event and press **Save** in Google Calendar.
 4. Choose `dist/manifest.json`.
 
 Temporary add-ons disappear when Firefox restarts. The packaged extension is
-written to `artifacts/ics-to-gcal-0.1.0.xpi`; permanent installation requires a
+written to `artifacts/ics-to-gcal-0.2.0.xpi`; permanent installation requires a
 Mozilla-signed build in standard Firefox releases.
 
 ## Use it
 
-Open an ICS URL or a text-rendered `.ics` file and click the extension button.
-The extension tries to read the current tab automatically. Alternatively, drop
-an `.ics` file onto the popup or select it from disk.
+Use any of these paths:
 
-Review the parsed events and select **Open in Google Calendar**. Each event
-opens as a draft; Google Calendar does not receive anything until that point.
+- Normally click an ICS link. When the server identifies it as calendar data,
+  the download/navigation is intercepted and Google Calendar opens.
+- Right-click a link and choose **Open ICS in Google Calendar**. This also
+  handles download endpoints whose URL does not end in `.ics`.
+- On a displayed ICS URL, click the extension toolbar button or right-click the
+  page and choose **Open this ICS page in Google Calendar**.
+
+If an intercepted URL cannot be fetched or parsed, the extension restores the
+original Firefox download and shows a notification.
 
 ## Development
 
@@ -65,7 +74,7 @@ and `npm run package`.
 ## Known limitations
 
 - A Google Calendar edit link represents one event. Multi-event files therefore
-  produce one button per event.
+  open one draft tab per event.
 - Recurrence exception instances (`RECURRENCE-ID` / `EXDATE`) cannot be fully
   represented by Google's edit-link format.
 - Attachments, alarms, organizer state, RSVP status, and arbitrary custom ICS
@@ -73,5 +82,8 @@ and `npm run package`.
 - Very large descriptions or attendee lists can exceed practical URL-length
   limits. For those files, use Google Calendar's native **Import & export**
   screen.
-- Firefox does not allow extensions to run on protected pages such as
-  `about:` pages. Use the file picker in those cases.
+- Automatic interception can replay only GET downloads. A POST-generated
+  calendar response is left to Firefox; its resulting download may still be
+  detected by the download listener.
+- Some servers require navigation-specific headers that an extension fetch
+  cannot reproduce. In that case the original download is restored.

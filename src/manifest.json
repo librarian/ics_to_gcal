@@ -1,15 +1,28 @@
 {
   "manifest_version": 3,
   "name": "ICS to Google Calendar",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Open ICS events as editable Google Calendar drafts.",
   "permissions": [
     "activeTab",
-    "scripting"
+    "downloads",
+    "menus",
+    "notifications",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking"
   ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "type": "module"
+  },
   "action": {
-    "default_title": "ICS to Google Calendar",
-    "default_popup": "popup.html",
+    "default_title": "Open this ICS page in Google Calendar",
     "default_icon": "icons/calendar.svg"
   },
   "icons": {
