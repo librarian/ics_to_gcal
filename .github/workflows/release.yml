@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -14,8 +16,11 @@ concurrency:
 
 jobs:
   release:
-    name: Build and publish release
+    name: Sign and publish release
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Check out tagged source
@@ -24,7 +29,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
 
       - name: Set up Python
@@ -38,8 +43,32 @@ jobs:
       - name: Test and package extension
         run: bash scripts/wsl-build.sh
 
-      - name: Create checksums
-        run: sha256sum artifacts/*.xpi > artifacts/SHA256SUMS
+      - name: Sign extension for self-distribution
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          npx --yes web-ext@10.5.0 sign \
+            --source-dir dist \
+            --artifacts-dir signed-artifacts \
+            --channel unlisted \
+            --api-key "$AMO_JWT_ISSUER" \
+            --api-secret "$AMO_JWT_SECRET" \
+            --timeout 900000 \
+            --approval-timeout 900000
+
+      - name: Locate signed extension
+        id: signed
+        run: |
+          mapfile -t signed_xpis < <(find signed-artifacts -maxdepth 1 -type f -name '*.xpi')
+          if [[ ${#signed_xpis[@]} -ne 1 ]]; then
+            echo "Expected exactly one signed XPI, found ${#signed_xpis[@]}" >&2
+            exit 1
+          fi
+          echo "path=${signed_xpis[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Build GitHub Pages release site
+        run: node scripts/build-site.mjs "${{ steps.signed.outputs.path }}"
 
       - name: Create or update GitHub release
         env:
@@ -47,12 +76,24 @@ jobs:
         run: |
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" \
-              artifacts/*.xpi artifacts/SHA256SUMS \
+              pages/*.xpi pages/SHA256SUMS \
               --clobber
           else
             gh release create "$GITHUB_REF_NAME" \
-              artifacts/*.xpi artifacts/SHA256SUMS \
+              pages/*.xpi pages/SHA256SUMS \
               --verify-tag \
               --generate-notes \
               --title "ICS to Google Calendar $GITHUB_REF_NAME"
           fi
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: pages
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

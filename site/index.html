@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Open ICS calendar events as editable Google Calendar drafts in Firefox.">
+    <title>ICS to Google Calendar</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <img src="./calendar.svg" width="88" height="88" alt="">
+        <p class="eyebrow">Firefox extension</p>
+        <h1>ICS to Google Calendar</h1>
+        <p class="lead">
+          Turn calendar downloads into editable Google Calendar drafts without
+          uploading the ICS file to an intermediary service.
+        </p>
+        <a class="install" href="{{XPI_PATH}}">Install version {{VERSION}}</a>
+        <p class="requirement">Requires Firefox 140 or newer.</p>
+      </header>
+
+      <section aria-labelledby="how-it-works">
+        <h2 id="how-it-works">One click from calendar file to draft</h2>
+        <ol>
+          <li>Click an ICS link, or use the link’s context menu.</li>
+          <li>The extension parses the event locally in Firefox.</li>
+          <li>Review the prepared event in Google Calendar and press Save.</li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="privacy">
+        <h2 id="privacy">Local parsing, transparent handoff</h2>
+        <p>
+          There is no extension account, analytics, or developer-operated
+          server. Event fields are sent directly to Google Calendar only to
+          create the draft you requested.
+        </p>
+        <p><a href="./privacy.html">Read the privacy policy</a></p>
+      </section>
+    </main>
+
+    <footer>
+      <a href="https://github.com/librarian/ics_to_gcal">Source code</a>
+      <span aria-hidden="true">·</span>
+      <a href="./SHA256SUMS">SHA-256 checksum</a>
+    </footer>
+  </body>
+</html>

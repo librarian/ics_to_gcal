@@ -1,6 +1,9 @@
 node_modules/
 dist/
 artifacts/
+pages/
+signed-artifacts/
+web-ext-artifacts/
 __pycache__/
 *.pyc
 *.xpi

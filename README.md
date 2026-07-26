@@ -6,6 +6,8 @@
 A Firefox extension that intercepts `.ics` links and downloads, then opens
 Google Calendar's new-event screen with the event details filled in.
 
+**[Install the signed extension](https://ics-to-gcal.libc6.org/)**
+
 The extension does not use the Google Calendar API or request access to your
 Google account. It fetches the selected ICS URL inside Firefox, parses it
 locally, and sends only the resulting event fields to Google Calendar when it
@@ -37,8 +39,13 @@ opens the draft. Nothing is added until you press **Save**.
 4. Choose `dist/manifest.json`.
 
 Temporary add-ons disappear when Firefox restarts. The packaged extension is
-written to `artifacts/ics-to-gcal-0.3.0.xpi`; permanent installation requires a
+written to `artifacts/ics-to-gcal-0.4.0.xpi`; permanent installation requires a
 Mozilla-signed build in standard Firefox releases.
+
+For normal use, install the Mozilla-signed release from
+[ics-to-gcal.libc6.org](https://ics-to-gcal.libc6.org/). Firefox 140 or newer
+is required. Releases installed from that site automatically check its
+`updates.json` manifest for newer signed versions.
 
 ## Use it
 
@@ -82,22 +89,29 @@ and `npm run package`.
 
 ## Continuous integration and releases
 
-GitHub Actions runs the tests and produces an XPI artifact for every push and
-pull request. Dependabot checks GitHub Actions weekly and npm metadata monthly.
+GitHub Actions runs the tests and produces an unsigned XPI artifact for every
+push and pull request. Dependabot checks GitHub Actions weekly and npm metadata
+monthly.
 
-Releases are created from version tags. Before tagging, keep the versions in
-`package.json`, `package-lock.json`, and `src/manifest.json` identical, then run:
+Tagged releases are submitted to Mozilla's unlisted signing channel, published
+as GitHub Release assets, and deployed to GitHub Pages together with a generated
+SHA-256-pinned Firefox update manifest. The release repository must define the
+`AMO_JWT_ISSUER` and `AMO_JWT_SECRET` Actions secrets.
+
+Before tagging, keep the versions in `package.json`, `package-lock.json`, and
+`src/manifest.json` identical, then run:
 
 ```bash
 bash scripts/wsl-build.sh
-git tag -a v0.3.0 -m "v0.3.0"
+git tag -a v0.4.0 -m "v0.4.0"
 git push origin main
-git push origin v0.3.0
+git push origin v0.4.0
 ```
 
 The tag must be exactly `v` followed by the package version. The release
-workflow reruns all tests, creates a deterministic XPI and SHA-256 checksum,
-then publishes both as GitHub Release assets with generated release notes.
+workflow reruns all tests, asks Mozilla to sign the extension for
+self-distribution, then publishes the signed XPI and checksum. GitHub Pages
+serves the install page, privacy policy, signed XPI, and `updates.json`.
 
 ## Known limitations
 
